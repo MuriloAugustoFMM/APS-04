@@ -1,173 +1,259 @@
 """
-app.py — API Flask que expõe o core (banco + algoritmos) para o frontend web.
+app.py — Servidor Flask: entrega as 3 páginas HTML e liga os algoritmos aos dados do banco.
 
-Rotas:
-  GET /api/imagens      -> lista paginada de imagens (metadados + thumbnail em base64)
-                            já ordenada pelo algoritmo e campo escolhidos
-  GET /api/benchmark     -> roda os 5 algoritmos sobre um dataset de tamanho N
-                            e devolve os tempos, para montar o gráfico comparativo
-  GET /                  -> serve o frontend estático (static/index.html)
-
-Rodar (a partir da raiz do projeto):
-    python app.py
-Depois acessar http://localhost:5000
+Rodar:  python app.py   ->  http://localhost:5000
 """
 
-import base64
+import os
 import random
 import time
 
-from flask import Flask, jsonify, request, send_from_directory
+import pymysql
+from flask import Flask, Response, jsonify, redirect, request, send_from_directory
 
-from core.algoritmos import bubble_sort, insertion_sort, merge_sort, quick_sort, radix_sort
+from core.algoritmos import bubble_sort, insertion_sort, merge_sort, quick_sort
 from core.dados import db
+from core.dados.imagens import detectar_mime
 
-app = Flask(__name__, static_folder="static", static_url_path="")
+app = Flask(__name__)
+app.config["BANCO"] = db.NOME_BANCO
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # imagens enviadas no CRUD: até 5 MB
 
 ALGORITMOS = {
-    "bubble": bubble_sort,
-    "insertion": insertion_sort,
-    "merge": merge_sort,
-    "quick": quick_sort,
-    "radix": radix_sort,
+    "bubble": ("Bubble Sort", bubble_sort),
+    "insertion": ("Insertion Sort", insertion_sort),
+    "merge": ("Merge Sort", merge_sort),
+    "quick": ("Quick Sort", quick_sort),
 }
+CAMPOS = ("tamanho_bytes", "data_captura", "nome_arquivo", "satelite", "id")
 
-CAMPOS_PERMITIDOS = {"tamanho_bytes", "data_captura", "nome_arquivo", "satelite"}
+
+class Erro(Exception):
+    """Pedido inválido: vira uma resposta 400 com a mensagem."""
+
+
+@app.errorhandler(Erro)
+def _erro(e):
+    return jsonify({"erro": str(e)}), 400
+
+
+@app.errorhandler(413)
+def _arquivo_grande(e):
+    return jsonify({"erro": "a imagem passa de 5 MB"}), 413
+
+
+def _banco():
+    return db.conectar(app.config["BANCO"])
+
+
+def _chave(campo):
+    """Como ler o valor que será ordenado. Valor vazio (None) vira '' para não quebrar a comparação."""
+    if campo in ("tamanho_bytes", "id"):
+        return lambda r: r[campo]
+    return lambda r: r[campo] or ""
+
+
+def _validar_ordenacao(algoritmo, campo):
+    if algoritmo not in ALGORITMOS:
+        raise Erro(f"algoritmo inválido: {algoritmo}")
+    if campo not in CAMPOS:
+        raise Erro(f"campo inválido: {campo}")
 
 
 # ---------------------------------------------------------------------------
-# Frontend estático
+# Páginas
 # ---------------------------------------------------------------------------
 
 @app.route("/")
-def index():
-    return send_from_directory(app.static_folder, "index.html")
+def inicio():
+    return redirect("/ordenacao")
+
+
+@app.route("/ordenacao")
+def pagina_ordenacao():
+    return send_from_directory("static", "ordenacao.html")
+
+
+@app.route("/crud")
+def pagina_crud():
+    return send_from_directory("static", "crud.html")
+
+
+@app.route("/comparador")
+def pagina_comparador():
+    return send_from_directory("static", "comparador.html")
 
 
 # ---------------------------------------------------------------------------
-# API: imagens
+# Página 1: ordenação com um algoritmo
 # ---------------------------------------------------------------------------
 
-@app.route("/api/imagens")
-def listar_imagens():
-    """
-    Query params:
-      pagina        (int, padrão 1)
-      por_pagina    (int, padrão 20, máximo 100)
-      ordenar_por   (um de CAMPOS_PERMITIDOS, padrão 'tamanho_bytes')
-      algoritmo     (um de ALGORITMOS, padrão 'quick')
-    """
-    pagina = max(int(request.args.get("pagina", 1)), 1)
-    por_pagina = min(int(request.args.get("por_pagina", 20)), 100)
-    ordenar_por = request.args.get("ordenar_por", "tamanho_bytes")
-    algoritmo_nome = request.args.get("algoritmo", "quick")
+@app.route("/api/ordenar")
+def ordenar():
+    algoritmo = request.args.get("algoritmo", "quick")
+    campo = request.args.get("campo", "tamanho_bytes")
+    _validar_ordenacao(algoritmo, campo)
 
-    if ordenar_por not in CAMPOS_PERMITIDOS:
-        return jsonify({"erro": f"campo inválido. use um de: {sorted(CAMPOS_PERMITIDOS)}"}), 400
-    if algoritmo_nome not in ALGORITMOS:
-        return jsonify({"erro": f"algoritmo inválido. use um de: {sorted(ALGORITMOS)}"}), 400
-    if algoritmo_nome == "radix" and ordenar_por != "tamanho_bytes":
-        return jsonify({"erro": "radix só ordena por 'tamanho_bytes' (chave inteira)"}), 400
+    with _banco() as conn:
+        registros = db.listar_todos(conn)
 
-    with db.conectar() as conn:
-        # Visualização mostra SOMENTE imagens reais (baixadas de verdade do
-        # INPE) — os registros sintéticos existem apenas para dar volume ao
-        # benchmark de ordenação, nunca são exibidos como se fossem imagem.
-        registros = [r for r in db.buscar_todos(conn, incluir_blob=False) if r["origem"] == "real"]
-
-        modulo = ALGORITMOS[algoritmo_nome]
-        ordenados = modulo.sort(registros, key=lambda r: r[ordenar_por])
-
-        total = len(ordenados)
-        inicio = (pagina - 1) * por_pagina
-        pagina_atual = ordenados[inicio: inicio + por_pagina]
-
-        ids_pagina = [r["id"] for r in pagina_atual]
-        thumbs = _buscar_thumbnails_por_id(conn, ids_pagina)
-
-    itens = []
-    for r in pagina_atual:
-        item = dict(r)
-        blob = thumbs.get(r["id"])
-        item["thumbnail_base64"] = base64.b64encode(blob).decode("ascii") if blob else None
-        itens.append(item)
+    inicio = time.perf_counter()  # o cronômetro mede SÓ o sort(), sem a leitura do banco
+    ordenados = ALGORITMOS[algoritmo][1].sort(registros, key=_chave(campo))
+    tempo = time.perf_counter() - inicio
 
     return jsonify({
-        "pagina": pagina,
-        "por_pagina": por_pagina,
-        "total": total,
-        "total_paginas": (total + por_pagina - 1) // por_pagina,
-        "ordenar_por": ordenar_por,
-        "algoritmo": algoritmo_nome,
-        "itens": itens,
+        "algoritmo": ALGORITMOS[algoritmo][0],
+        "campo": campo,
+        "quantidade": len(ordenados),
+        "tempo_segundos": tempo,
+        "itens": ordenados,
     })
 
 
-def _buscar_thumbnails_por_id(conn, ids: list[int]) -> dict:
-    if not ids:
-        return {}
-    marcadores = ",".join("?" for _ in ids)
-    cur = conn.execute(
-        f"SELECT id, thumbnail_blob FROM metadados_imagem WHERE id IN ({marcadores})",
-        ids,
-    )
-    return {row["id"]: row["thumbnail_blob"] for row in cur.fetchall()}
-
-
 # ---------------------------------------------------------------------------
-# API: benchmark
+# Página 3: comparador
 # ---------------------------------------------------------------------------
 
-@app.route("/api/benchmark")
-def rodar_benchmark():
-    """
-    Query params:
-      tamanho   (int, padrão 1000) quantidade de registros usados no teste
-      campo     (um de CAMPOS_PERMITIDOS, padrão 'tamanho_bytes')
-      cenario   'aleatorio' | 'ordenado' | 'invertido' (padrão 'aleatorio')
+@app.route("/api/resumo")
+def resumo():
+    with _banco() as conn:
+        return jsonify({"total": db.contar(conn)})
 
-    Mede só o tempo da chamada sort() — os dados já vêm carregados do banco
-    antes de cronometrar, como exige o enunciado da APS.
-    """
-    tamanho = min(int(request.args.get("tamanho", 1000)), 10000)
+
+@app.route("/api/comparar")
+def comparar():
     campo = request.args.get("campo", "tamanho_bytes")
     cenario = request.args.get("cenario", "aleatorio")
+    try:
+        quantidade = int(request.args.get("quantidade", 1000))
+    except ValueError:
+        raise Erro("quantidade precisa ser um número inteiro")
+    if campo not in CAMPOS:
+        raise Erro(f"campo inválido: {campo}")
+    if cenario not in ("aleatorio", "ordenado", "invertido"):
+        raise Erro(f"cenário inválido: {cenario}")
 
-    if campo not in CAMPOS_PERMITIDOS:
-        return jsonify({"erro": f"campo inválido. use um de: {sorted(CAMPOS_PERMITIDOS)}"}), 400
+    with _banco() as conn:
+        registros = db.listar_todos(conn)
+    if not registros:
+        raise Erro("o banco está vazio. Rode: python -m core.dados.popular_banco")
 
-    with db.conectar() as conn:
-        registros = db.buscar_todos(conn, incluir_blob=False)
-
-    if len(registros) < tamanho:
-        tamanho = len(registros)
-    base = registros[:tamanho]
-
+    quantidade = max(1, min(quantidade, len(registros)))
+    amostra = random.sample(registros, quantidade)  # amostra aleatória do banco
+    chave = _chave(campo)
     if cenario == "ordenado":
-        base = sorted(base, key=lambda r: r[campo])
+        amostra.sort(key=chave)                # prepara os dados ANTES de cronometrar
     elif cenario == "invertido":
-        base = sorted(base, key=lambda r: r[campo], reverse=True)
-    elif cenario == "aleatorio":
-        base = base.copy()
-        random.shuffle(base)
-    else:
-        return jsonify({"erro": "cenario inválido. use: aleatorio, ordenado ou invertido"}), 400
+        amostra.sort(key=chave, reverse=True)
 
-    resultados = {}
-    for nome, modulo in ALGORITMOS.items():
-        if nome == "radix" and campo != "tamanho_bytes":
-            continue  # radix não serve pra chaves não-inteiras, pula
+    resultados = []
+    for nome, (rotulo, modulo) in ALGORITMOS.items():
         inicio = time.perf_counter()
-        modulo.sort(base, key=lambda r: r[campo])
-        resultados[nome] = round(time.perf_counter() - inicio, 6)
+        modulo.sort(amostra, key=chave)
+        resultados.append({"algoritmo": rotulo, "tempo_segundos": time.perf_counter() - inicio})
 
-    return jsonify({
-        "tamanho": tamanho,
-        "campo": campo,
-        "cenario": cenario,
-        "tempos_segundos": resultados,
-    })
+    return jsonify({"quantidade": quantidade, "campo": campo, "cenario": cenario, "resultados": resultados})
+
+
+# ---------------------------------------------------------------------------
+# Página 2: CRUD
+# ---------------------------------------------------------------------------
+
+def _numero(valor, nome):
+    if valor in (None, ""):
+        return None
+    try:
+        return float(valor)
+    except (TypeError, ValueError):
+        raise Erro(f"{nome} precisa ser um número")
+
+
+def _campos_do_pedido(dados, obrigatorio):
+    """Lê e confere os metadados enviados pelo formulário (dados = request.form ou JSON)."""
+    campos = {}
+    for nome in db.CAMPOS_EDITAVEIS:
+        if nome in dados:
+            valor = dados[nome]
+            campos[nome] = _numero(valor, nome) if nome in ("latitude", "longitude") else (valor or None)
+    if obrigatorio and not campos.get("nome_arquivo"):
+        raise Erro("nome_arquivo é obrigatório")
+    if "nome_arquivo" in campos and not campos["nome_arquivo"]:
+        raise Erro("nome_arquivo não pode ficar vazio")
+    return campos
+
+
+@app.route("/api/registros", methods=["GET"])
+def listar_registros():
+    id_busca = request.args.get("id", "").strip()
+    if id_busca:  # busca por ID: devolve só esse registro (ou lista vazia)
+        try:
+            id_ = int(id_busca)
+        except ValueError:
+            raise Erro("o ID precisa ser um número inteiro")
+        with _banco() as conn:
+            registro = db.obter(conn, id_)
+        itens = [registro] if registro else []
+        return jsonify({"itens": itens, "total": len(itens), "pagina": 1, "total_paginas": 1})
+    try:
+        pagina = max(1, int(request.args.get("pagina", 1)))
+    except ValueError:
+        raise Erro("pagina precisa ser um número inteiro")
+    por_pagina = 20
+    with _banco() as conn:
+        itens, total = db.listar_pagina(conn, pagina, por_pagina)
+    return jsonify({"itens": itens, "total": total, "pagina": pagina,
+                    "total_paginas": max(1, -(-total // por_pagina))})
+
+
+@app.route("/api/registros", methods=["POST"])
+def criar_registro():
+    campos = _campos_do_pedido(request.form, obrigatorio=True)
+    arquivo = request.files.get("imagem")
+    if not arquivo:
+        raise Erro("envie uma imagem")
+    imagem = arquivo.read()
+    if detectar_mime(imagem) is None:
+        raise Erro("o arquivo enviado não é uma imagem válida (PNG, JPEG, GIF ou WEBP)")
+    try:
+        with _banco() as conn:
+            novo_id = db.criar(conn, campos, imagem)
+            return jsonify(db.obter(conn, novo_id)), 201
+    except (pymysql.err.IntegrityError, pymysql.err.DataError) as erro:
+        raise Erro(f"não foi possível gravar: {erro}")
+
+
+@app.route("/api/registros/<int:id_>", methods=["PUT"])
+def editar_registro(id_):
+    campos = _campos_do_pedido(request.form, obrigatorio=False)
+    arquivo = request.files.get("imagem")
+    imagem = arquivo.read() if arquivo and arquivo.filename else None  # imagem nova é opcional
+    if imagem is not None and detectar_mime(imagem) is None:
+        raise Erro("o arquivo enviado não é uma imagem válida (PNG, JPEG, GIF ou WEBP)")
+    with _banco() as conn:
+        if not db.atualizar(conn, id_, campos, imagem):
+            return jsonify({"erro": "registro não encontrado"}), 404
+        return jsonify(db.obter(conn, id_))
+
+
+@app.route("/api/registros/<int:id_>", methods=["DELETE"])
+def apagar_registro(id_):
+    with _banco() as conn:
+        if not db.deletar(conn, id_):
+            return jsonify({"erro": "registro não encontrado"}), 404
+    return jsonify({"apagado": id_})
+
+
+@app.route("/api/imagens/<int:id_>/thumbnail")
+def thumbnail(id_):
+    with _banco() as conn:
+        blob = db.obter_thumbnail(conn, id_)
+    mime = detectar_mime(blob) if blob else None
+    if mime is None:
+        return jsonify({"erro": "sem imagem"}), 404
+    resposta = Response(blob, mimetype=mime)
+    resposta.headers["Cache-Control"] = "no-cache"  # depois de trocar a imagem, o navegador busca a nova
+    return resposta
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

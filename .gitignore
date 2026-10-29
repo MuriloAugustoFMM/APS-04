@@ -1,7 +1,5 @@
 __pycache__/
 *.pyc
 .venv/
-.pytest_cache/
-# banco gerado localmente (centenas de MB) - não versionar
 data/*.sqlite
-!data/.gitkeep
+*.sql

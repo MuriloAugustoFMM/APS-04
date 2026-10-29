@@ -1,0 +1,24 @@
+body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 16px; color: #222; background: #fafafa; }
+nav { display: flex; gap: 16px; padding-bottom: 8px; border-bottom: 2px solid #ccc; margin-bottom: 16px; }
+nav a { text-decoration: none; color: #0645ad; font-weight: bold; }
+nav a.atual { color: #222; border-bottom: 3px solid #222; }
+h1 { font-size: 1.4rem; margin: 0 0 12px; }
+form { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 16px; }
+label { display: flex; flex-direction: column; font-size: 0.85rem; gap: 4px; }
+input, select, button { padding: 6px 8px; font-size: 0.95rem; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: 0.6; }
+table { border-collapse: collapse; width: 100%; background: #fff; }
+th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: left; font-size: 0.85rem; vertical-align: middle; }
+th { background: #eee; }
+td img { display: block; width: 64px; height: 64px; object-fit: cover; background: #ddd; cursor: zoom-in; }
+#ampliada { position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.85); cursor: zoom-out; }
+#ampliada img { width: min(90vw, 90vh); height: min(90vw, 90vh); object-fit: contain; }
+.caixa { background: #fff; border: 1px solid #ccc; padding: 10px 14px; margin-bottom: 12px; }
+.grande { font-size: 1.8rem; font-family: monospace; font-weight: bold; }
+.pequeno { font-size: 0.8rem; color: #555; }
+.erro { color: #b00020; }
+.paginacao { display: flex; gap: 12px; align-items: center; margin: 12px 0; }
+.resultado { font-family: monospace; font-size: 1.05rem; margin: 4px 0; }
+[hidden] { display: none !important; }

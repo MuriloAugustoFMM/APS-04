@@ -1,0 +1,674 @@
+[
+ {
+  "cenario": "aleatorio",
+  "n": 100,
+  "algoritmo": "Bubble Sort",
+  "t": 0.0009089229999972304,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 100,
+  "algoritmo": "Insertion Sort",
+  "t": 0.00037912400000550406,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 100,
+  "algoritmo": "Merge Sort",
+  "t": 0.0002303099999778624,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 100,
+  "algoritmo": "Quick Sort",
+  "t": 0.00023879799999804163,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 500,
+  "algoritmo": "Bubble Sort",
+  "t": 0.024118857000019034,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 500,
+  "algoritmo": "Insertion Sort",
+  "t": 0.006210852999998906,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 500,
+  "algoritmo": "Merge Sort",
+  "t": 0.0008474930000090808,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 500,
+  "algoritmo": "Quick Sort",
+  "t": 0.0011522289999845725,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 1000,
+  "algoritmo": "Bubble Sort",
+  "t": 0.06241803900002196,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 1000,
+  "algoritmo": "Insertion Sort",
+  "t": 0.019914985000013985,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 1000,
+  "algoritmo": "Merge Sort",
+  "t": 0.001545497000023488,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 1000,
+  "algoritmo": "Quick Sort",
+  "t": 0.0019613219999996545,
+  "reps": 5
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 2500,
+  "algoritmo": "Bubble Sort",
+  "t": 0.4061955120000107,
+  "reps": 3
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 2500,
+  "algoritmo": "Insertion Sort",
+  "t": 0.13499687099999846,
+  "reps": 3
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 2500,
+  "algoritmo": "Merge Sort",
+  "t": 0.005466972000021997,
+  "reps": 3
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 2500,
+  "algoritmo": "Quick Sort",
+  "t": 0.007666265000011663,
+  "reps": 3
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 5000,
+  "algoritmo": "Bubble Sort",
+  "t": 2.0945288579999897,
+  "reps": 3
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 5000,
+  "algoritmo": "Insertion Sort",
+  "t": 0.7473439350000035,
+  "reps": 3
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 5000,
+  "algoritmo": "Merge Sort",
+  "t": 0.015617950999995855,
+  "reps": 3
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 5000,
+  "algoritmo": "Quick Sort",
+  "t": 0.017963802999986456,
+  "reps": 3
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 10000,
+  "algoritmo": "Bubble Sort",
+  "t": 10.680890973000004,
+  "reps": 2
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 10000,
+  "algoritmo": "Insertion Sort",
+  "t": 3.735261254500003,
+  "reps": 2
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 10000,
+  "algoritmo": "Merge Sort",
+  "t": 0.03067982550000181,
+  "reps": 2
+ },
+ {
+  "cenario": "aleatorio",
+  "n": 10000,
+  "algoritmo": "Quick Sort",
+  "t": 0.04117396850000432,
+  "reps": 2
+ },
+ {
+  "cenario": "semi",
+  "n": 100,
+  "algoritmo": "Bubble Sort",
+  "t": 0.0005064919999995254,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 100,
+  "algoritmo": "Insertion Sort",
+  "t": 5.177299999559182e-05,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 100,
+  "algoritmo": "Merge Sort",
+  "t": 0.00011148900000534923,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 100,
+  "algoritmo": "Quick Sort",
+  "t": 0.00012236399999210334,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 500,
+  "algoritmo": "Bubble Sort",
+  "t": 0.012989519999990762,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 500,
+  "algoritmo": "Insertion Sort",
+  "t": 0.0010129340000162301,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 500,
+  "algoritmo": "Merge Sort",
+  "t": 0.0007768410000039694,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 500,
+  "algoritmo": "Quick Sort",
+  "t": 0.0008679350000022623,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 1000,
+  "algoritmo": "Bubble Sort",
+  "t": 0.053338865000000624,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 1000,
+  "algoritmo": "Insertion Sort",
+  "t": 0.0035376010000049973,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 1000,
+  "algoritmo": "Merge Sort",
+  "t": 0.0016913460000012037,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 1000,
+  "algoritmo": "Quick Sort",
+  "t": 0.0021181379999859473,
+  "reps": 5
+ },
+ {
+  "cenario": "semi",
+  "n": 2500,
+  "algoritmo": "Bubble Sort",
+  "t": 0.33553523599999835,
+  "reps": 3
+ },
+ {
+  "cenario": "semi",
+  "n": 2500,
+  "algoritmo": "Insertion Sort",
+  "t": 0.020143847000014148,
+  "reps": 3
+ },
+ {
+  "cenario": "semi",
+  "n": 2500,
+  "algoritmo": "Merge Sort",
+  "t": 0.005089074000011351,
+  "reps": 3
+ },
+ {
+  "cenario": "semi",
+  "n": 2500,
+  "algoritmo": "Quick Sort",
+  "t": 0.005300164999994195,
+  "reps": 3
+ },
+ {
+  "cenario": "semi",
+  "n": 5000,
+  "algoritmo": "Bubble Sort",
+  "t": 1.4992007320000198,
+  "reps": 3
+ },
+ {
+  "cenario": "semi",
+  "n": 5000,
+  "algoritmo": "Insertion Sort",
+  "t": 0.08289810799999486,
+  "reps": 3
+ },
+ {
+  "cenario": "semi",
+  "n": 5000,
+  "algoritmo": "Merge Sort",
+  "t": 0.01112612800000079,
+  "reps": 3
+ },
+ {
+  "cenario": "semi",
+  "n": 5000,
+  "algoritmo": "Quick Sort",
+  "t": 0.012325745999987703,
+  "reps": 3
+ },
+ {
+  "cenario": "semi",
+  "n": 10000,
+  "algoritmo": "Bubble Sort",
+  "t": 7.7570055215000195,
+  "reps": 2
+ },
+ {
+  "cenario": "semi",
+  "n": 10000,
+  "algoritmo": "Insertion Sort",
+  "t": 0.3531032064999806,
+  "reps": 2
+ },
+ {
+  "cenario": "semi",
+  "n": 10000,
+  "algoritmo": "Merge Sort",
+  "t": 0.02043350899998586,
+  "reps": 2
+ },
+ {
+  "cenario": "semi",
+  "n": 10000,
+  "algoritmo": "Quick Sort",
+  "t": 0.02834338050001861,
+  "reps": 2
+ },
+ {
+  "cenario": "ordenado",
+  "n": 100,
+  "algoritmo": "Bubble Sort",
+  "t": 1.4277999980549794e-05,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 100,
+  "algoritmo": "Insertion Sort",
+  "t": 1.295999999229025e-05,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 100,
+  "algoritmo": "Merge Sort",
+  "t": 9.192599998186779e-05,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 100,
+  "algoritmo": "Quick Sort",
+  "t": 0.00011617399997021494,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 500,
+  "algoritmo": "Bubble Sort",
+  "t": 4.9303000025702204e-05,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 500,
+  "algoritmo": "Insertion Sort",
+  "t": 7.326899998361114e-05,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 500,
+  "algoritmo": "Merge Sort",
+  "t": 0.0005745700000261422,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 500,
+  "algoritmo": "Quick Sort",
+  "t": 0.000726189000033628,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 1000,
+  "algoritmo": "Bubble Sort",
+  "t": 0.0001501959999927749,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 1000,
+  "algoritmo": "Insertion Sort",
+  "t": 0.00016105100002050676,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 1000,
+  "algoritmo": "Merge Sort",
+  "t": 0.0012446920000002137,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 1000,
+  "algoritmo": "Quick Sort",
+  "t": 0.001677960999984407,
+  "reps": 5
+ },
+ {
+  "cenario": "ordenado",
+  "n": 2500,
+  "algoritmo": "Bubble Sort",
+  "t": 0.00042104499999595646,
+  "reps": 3
+ },
+ {
+  "cenario": "ordenado",
+  "n": 2500,
+  "algoritmo": "Insertion Sort",
+  "t": 0.0004918180000004213,
+  "reps": 3
+ },
+ {
+  "cenario": "ordenado",
+  "n": 2500,
+  "algoritmo": "Merge Sort",
+  "t": 0.0035287050000079034,
+  "reps": 3
+ },
+ {
+  "cenario": "ordenado",
+  "n": 2500,
+  "algoritmo": "Quick Sort",
+  "t": 0.004962222000017391,
+  "reps": 3
+ },
+ {
+  "cenario": "ordenado",
+  "n": 5000,
+  "algoritmo": "Bubble Sort",
+  "t": 0.0008710870000072646,
+  "reps": 3
+ },
+ {
+  "cenario": "ordenado",
+  "n": 5000,
+  "algoritmo": "Insertion Sort",
+  "t": 0.00106116399996381,
+  "reps": 3
+ },
+ {
+  "cenario": "ordenado",
+  "n": 5000,
+  "algoritmo": "Merge Sort",
+  "t": 0.007843815000001086,
+  "reps": 3
+ },
+ {
+  "cenario": "ordenado",
+  "n": 5000,
+  "algoritmo": "Quick Sort",
+  "t": 0.011217628999986573,
+  "reps": 3
+ },
+ {
+  "cenario": "ordenado",
+  "n": 10000,
+  "algoritmo": "Bubble Sort",
+  "t": 0.0017514800000242303,
+  "reps": 2
+ },
+ {
+  "cenario": "ordenado",
+  "n": 10000,
+  "algoritmo": "Insertion Sort",
+  "t": 0.0023980500000106986,
+  "reps": 2
+ },
+ {
+  "cenario": "ordenado",
+  "n": 10000,
+  "algoritmo": "Merge Sort",
+  "t": 0.020225631999977622,
+  "reps": 2
+ },
+ {
+  "cenario": "ordenado",
+  "n": 10000,
+  "algoritmo": "Quick Sort",
+  "t": 0.030055641500013053,
+  "reps": 2
+ },
+ {
+  "cenario": "invertido",
+  "n": 100,
+  "algoritmo": "Bubble Sort",
+  "t": 0.0005921860000057677,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 100,
+  "algoritmo": "Insertion Sort",
+  "t": 0.00047685900000260517,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 100,
+  "algoritmo": "Merge Sort",
+  "t": 0.00010749700004453189,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 100,
+  "algoritmo": "Quick Sort",
+  "t": 0.00011119200001985519,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 500,
+  "algoritmo": "Bubble Sort",
+  "t": 0.019539865000012924,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 500,
+  "algoritmo": "Insertion Sort",
+  "t": 0.012289345999988655,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 500,
+  "algoritmo": "Merge Sort",
+  "t": 0.0006031590000361575,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 500,
+  "algoritmo": "Quick Sort",
+  "t": 0.0007649129999549587,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 1000,
+  "algoritmo": "Bubble Sort",
+  "t": 0.06854802800000925,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 1000,
+  "algoritmo": "Insertion Sort",
+  "t": 0.04981912400000965,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 1000,
+  "algoritmo": "Merge Sort",
+  "t": 0.0013872369999603507,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 1000,
+  "algoritmo": "Quick Sort",
+  "t": 0.0016980820000185304,
+  "reps": 5
+ },
+ {
+  "cenario": "invertido",
+  "n": 2500,
+  "algoritmo": "Bubble Sort",
+  "t": 0.48971152199999324,
+  "reps": 3
+ },
+ {
+  "cenario": "invertido",
+  "n": 2500,
+  "algoritmo": "Insertion Sort",
+  "t": 0.36477212099998724,
+  "reps": 3
+ },
+ {
+  "cenario": "invertido",
+  "n": 2500,
+  "algoritmo": "Merge Sort",
+  "t": 0.0037994720000256166,
+  "reps": 3
+ },
+ {
+  "cenario": "invertido",
+  "n": 2500,
+  "algoritmo": "Quick Sort",
+  "t": 0.005089359000010063,
+  "reps": 3
+ },
+ {
+  "cenario": "invertido",
+  "n": 5000,
+  "algoritmo": "Bubble Sort",
+  "t": 2.2352815919999784,
+  "reps": 3
+ },
+ {
+  "cenario": "invertido",
+  "n": 5000,
+  "algoritmo": "Insertion Sort",
+  "t": 1.4512362399999574,
+  "reps": 3
+ },
+ {
+  "cenario": "invertido",
+  "n": 5000,
+  "algoritmo": "Merge Sort",
+  "t": 0.006639095000025463,
+  "reps": 3
+ },
+ {
+  "cenario": "invertido",
+  "n": 5000,
+  "algoritmo": "Quick Sort",
+  "t": 0.009554347000005237,
+  "reps": 3
+ },
+ {
+  "cenario": "invertido",
+  "n": 10000,
+  "algoritmo": "Bubble Sort",
+  "t": 11.543702763999988,
+  "reps": 2
+ },
+ {
+  "cenario": "invertido",
+  "n": 10000,
+  "algoritmo": "Insertion Sort",
+  "t": 8.299572056000017,
+  "reps": 2
+ },
+ {
+  "cenario": "invertido",
+  "n": 10000,
+  "algoritmo": "Merge Sort",
+  "t": 0.017330677999979116,
+  "reps": 2
+ },
+ {
+  "cenario": "invertido",
+  "n": 10000,
+  "algoritmo": "Quick Sort",
+  "t": 0.02790320350001707,
+  "reps": 2
+ }
+]

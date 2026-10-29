@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Comparador</title>
+  <link rel="stylesheet" href="/static/estilo.css">
+</head>
+<body>
+  <nav>
+    <a href="/ordenacao">Ordenação</a>
+    <a href="/crud">CRUD</a>
+    <a href="/comparador" class="atual">Comparador</a>
+  </nav>
+
+  <h1>Comparador de algoritmos</h1>
+  <p class="pequeno" id="resumo"></p>
+
+  <form id="form">
+    <label>Quantidade de registros
+      <input type="number" id="quantidade" value="1000" min="1">
+    </label>
+    <label>Ordenar por
+      <select id="campo">
+        <option value="tamanho_bytes">Tamanho (bytes)</option>
+        <option value="data_captura">Data de captura</option>
+        <option value="nome_arquivo">Nome</option>
+        <option value="satelite">Satélite</option>
+        <option value="id">ID (ordem de inserção)</option>
+      </select>
+    </label>
+    <label>Dados de entrada
+      <select id="cenario">
+        <option value="aleatorio">Aleatórios (padrão)</option>
+        <option value="ordenado">Pré-ordenados</option>
+        <option value="invertido">Invertidos</option>
+      </select>
+    </label>
+    <button type="submit" id="botao">Comparar</button>
+  </form>
+
+  <p id="status"></p>
+  <div class="caixa" id="resultados" hidden></div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    fetch("/api/resumo").then((r) => r.json()).then((d) => {
+      $("resumo").textContent = `Registros no banco: ${d.total}`;
+      $("quantidade").max = d.total;
+    });
+
+    $("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      $("botao").disabled = true;
+      $("resultados").hidden = true;
+      $("status").className = "";
+      $("status").textContent = "Comparando... (aguarde)";
+
+      const params = new URLSearchParams({
+        quantidade: $("quantidade").value, campo: $("campo").value, cenario: $("cenario").value,
+      });
+      try {
+        const resposta = await fetch("/api/comparar?" + params);
+        const dados = await resposta.json();
+        if (!resposta.ok) throw new Error(dados.erro || "erro no servidor");
+
+        const linhas = dados.resultados.map((r) => {
+          const div = document.createElement("div");
+          div.className = "resultado";
+          div.textContent = `${r.algoritmo}: ${r.tempo_segundos.toFixed(6)} s`;
+          return div;
+        });
+        $("resultados").replaceChildren(...linhas);
+        $("resultados").hidden = false;
+        $("status").textContent = `${dados.quantidade} registros · campo: ${dados.campo} · dados: ${dados.cenario}`;
+      } catch (erro) {
+        $("status").textContent = "Erro: " + erro.message;
+        $("status").className = "erro";
+      } finally {
+        $("botao").disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

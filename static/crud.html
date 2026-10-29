@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CRUD</title>
+  <link rel="stylesheet" href="/static/estilo.css">
+</head>
+<body>
+  <nav>
+    <a href="/ordenacao">Ordenação</a>
+    <a href="/crud" class="atual">CRUD</a>
+    <a href="/comparador">Comparador</a>
+  </nav>
+
+  <h1>CRUD de imagens</h1>
+
+  <form id="form">
+    <label>Nome do arquivo *<input id="nome_arquivo" name="nome_arquivo" required></label>
+    <label>Data de captura<input id="data_captura" name="data_captura" placeholder="2023-05-12T13:40:00Z"></label>
+    <label>Satélite<input id="satelite" name="satelite"></label>
+    <label>Sensor<input id="sensor" name="sensor"></label>
+    <label>Latitude<input id="latitude" name="latitude" type="number" step="any"></label>
+    <label>Longitude<input id="longitude" name="longitude" type="number" step="any"></label>
+    <label id="rotulo-imagem"><span id="texto-imagem">Imagem *</span><input id="imagem" name="imagem" type="file" accept="image/*" required></label>
+    <button type="submit" id="botao">Cadastrar</button>
+    <button type="button" id="cancelar" hidden>Cancelar edição</button>
+  </form>
+  <p id="status"></p>
+
+  <form id="busca">
+    <label>Buscar por ID<input id="busca-id" type="number" min="1" step="1"></label>
+    <button type="submit">Buscar</button>
+    <button type="button" id="limpar-busca">Limpar busca</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr><th>Miniatura</th><th>ID</th><th>Nome</th><th>Satélite</th><th>Sensor</th><th>Data</th><th>Lat</th><th>Lon</th><th>Bytes</th><th>Origem</th><th>Ações</th></tr>
+    </thead>
+    <tbody id="corpo"></tbody>
+  </table>
+
+  <div class="paginacao">
+    <button id="anterior">Anterior</button>
+    <span id="pagina-info"></span>
+    <button id="proxima">Próxima</button>
+  </div>
+
+  <script src="/static/ampliar.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const CAMPOS = ["nome_arquivo", "data_captura", "satelite", "sensor", "latitude", "longitude"];
+    let pagina = 1;
+    let totalPaginas = 1;
+    let editandoId = null;
+    let buscaId = "";          // se preenchido, a tabela mostra só esse registro
+    let versao = Date.now();   // muda ao editar: força o navegador a recarregar as miniaturas
+
+    function mensagem(texto, erro = false) {
+      $("status").textContent = texto;
+      $("status").className = erro ? "erro" : "";
+    }
+
+    function celula(texto) {
+      const td = document.createElement("td");
+      td.textContent = texto ?? "—";
+      return td;
+    }
+
+    function botao(texto, aoClicar) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = texto;
+      b.addEventListener("click", aoClicar);
+      return b;
+    }
+
+    async function carregar() {
+      const resposta = await fetch(buscaId ? "/api/registros?id=" + encodeURIComponent(buscaId) : "/api/registros?pagina=" + pagina);
+      const dados = await resposta.json();
+      if (!resposta.ok) { mensagem("Erro: " + dados.erro, true); return; }
+      totalPaginas = dados.total_paginas;
+      if (pagina > totalPaginas) { pagina = totalPaginas; return carregar(); }
+
+      const linhas = dados.itens.map((item) => {
+        const tr = document.createElement("tr");
+        const tdImg = document.createElement("td");
+        const img = document.createElement("img");
+        img.src = `/api/imagens/${item.id}/thumbnail?v=${versao}`;
+        img.loading = "lazy";
+        img.onerror = () => tdImg.replaceChildren("sem imagem");
+        tdImg.appendChild(img);
+
+        const tdAcoes = document.createElement("td");
+        tdAcoes.append(botao("Editar", () => iniciarEdicao(item)), " ", botao("Excluir", () => excluir(item)));
+
+        tr.append(tdImg, celula(item.id), celula(item.nome_arquivo), celula(item.satelite), celula(item.sensor),
+                  celula(item.data_captura), celula(item.latitude), celula(item.longitude),
+                  celula(item.tamanho_bytes), celula(item.origem), tdAcoes);
+        return tr;
+      });
+      $("corpo").replaceChildren(...linhas);
+      $("pagina-info").textContent = !buscaId ? `Página ${pagina} de ${totalPaginas} (${dados.total} registros)`
+        : dados.total ? `Resultado da busca pelo ID ${buscaId}` : `Nenhum registro com o ID ${buscaId}`;
+      $("anterior").disabled = pagina <= 1;
+      $("proxima").disabled = pagina >= totalPaginas;
+    }
+
+    function iniciarEdicao(item) {
+      editandoId = item.id;
+      CAMPOS.forEach((c) => { $(c).value = item[c] ?? ""; });
+      $("texto-imagem").textContent = "Nova imagem (opcional)";   // sem escolher, a imagem atual continua
+      $("imagem").required = false;
+      $("botao").textContent = `Salvar alterações (id ${item.id})`;
+      $("cancelar").hidden = false;
+      window.scrollTo(0, 0);
+    }
+
+    function sairDaEdicao() {
+      editandoId = null;
+      $("form").reset();
+      $("texto-imagem").textContent = "Imagem *";
+      $("imagem").required = true;
+      $("botao").textContent = "Cadastrar";
+      $("cancelar").hidden = true;
+    }
+
+    async function excluir(item) {
+      if (!confirm(`Excluir o registro ${item.id} (${item.nome_arquivo})?`)) return;
+      const resposta = await fetch("/api/registros/" + item.id, { method: "DELETE" });
+      const dados = await resposta.json();
+      mensagem(resposta.ok ? `Registro ${item.id} excluído.` : dados.erro, !resposta.ok);
+      carregar();
+    }
+
+    $("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      let resposta;
+      if (editandoId === null) {
+        resposta = await fetch("/api/registros", { method: "POST", body: new FormData($("form")) });
+      } else {
+        resposta = await fetch("/api/registros/" + editandoId, { method: "PUT", body: new FormData($("form")) });
+      }
+      const dados = await resposta.json();
+      if (!resposta.ok) { mensagem("Erro: " + dados.erro, true); return; }
+      const cadastro = editandoId === null;
+      mensagem(cadastro ? `Cadastrado com id ${dados.id}.` : `Registro ${dados.id} atualizado.`);
+      sairDaEdicao();
+      if (cadastro) { pagina = 1; buscaId = ""; $("busca-id").value = ""; }   // novo registro aparece no topo da lista
+      versao = Date.now();
+      carregar();
+    });
+
+    $("busca").addEventListener("submit", (e) => {
+      e.preventDefault();
+      buscaId = $("busca-id").value.trim();
+      pagina = 1;
+      carregar();
+    });
+    $("limpar-busca").addEventListener("click", () => {
+      $("busca-id").value = "";
+      buscaId = "";
+      pagina = 1;
+      carregar();
+    });
+    $("cancelar").addEventListener("click", sairDaEdicao);
+    $("anterior").addEventListener("click", () => { pagina--; carregar(); });
+    $("proxima").addEventListener("click", () => { pagina++; carregar(); });
+    carregar();
+  </script>
+</body>
+</html>

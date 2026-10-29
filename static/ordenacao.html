@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ordenação</title>
+  <link rel="stylesheet" href="/static/estilo.css">
+</head>
+<body>
+  <nav>
+    <a href="/ordenacao" class="atual">Ordenação</a>
+    <a href="/crud">CRUD</a>
+    <a href="/comparador">Comparador</a>
+  </nav>
+
+  <h1>Ordenação com um algoritmo</h1>
+
+  <form id="form">
+    <label>Ordenar por
+      <select id="campo">
+        <option value="tamanho_bytes">Tamanho (bytes)</option>
+        <option value="data_captura">Data de captura</option>
+        <option value="nome_arquivo">Nome</option>
+        <option value="satelite">Satélite</option>
+        <option value="id">ID (ordem de inserção)</option>
+      </select>
+    </label>
+    <label>Algoritmo
+      <select id="algoritmo">
+        <option value="quick">Quick Sort</option>
+        <option value="merge">Merge Sort</option>
+        <option value="insertion">Insertion Sort</option>
+        <option value="bubble">Bubble Sort</option>
+      </select>
+    </label>
+    <button type="submit" id="botao">Ordenar</button>
+  </form>
+
+  <div class="caixa">
+    <div>Cronômetro ao vivo: <span class="grande" id="ao-vivo">0.00 s</span></div>
+    <div>Tempo só da ordenação (sort): <span class="grande" id="tempo-sort">—</span></div>
+  </div>
+
+  <p id="status"></p>
+
+  <table>
+    <thead>
+      <tr><th>Miniatura</th><th>ID</th><th>Nome</th><th>Satélite</th><th>Sensor</th><th>Data</th><th>Tamanho (bytes)</th><th>Origem</th></tr>
+    </thead>
+    <tbody id="corpo"></tbody>
+  </table>
+
+  <div class="paginacao">
+    <button id="anterior" disabled>Anterior</button>
+    <span id="pagina-info"></span>
+    <button id="proxima" disabled>Próxima</button>
+  </div>
+
+  <script src="/static/ampliar.js"></script>
+  <script>
+    const POR_PAGINA = 20;
+    let itens = [];
+    let pagina = 1;
+    const $ = (id) => document.getElementById(id);
+
+    function formatarTempo(s) {
+      if (s < 0.001) return (s * 1e6).toFixed(0) + " µs";
+      if (s < 1) return (s * 1000).toFixed(2) + " ms";
+      return s.toFixed(3) + " s";
+    }
+
+    function celula(texto) {
+      const td = document.createElement("td");
+      td.textContent = texto ?? "—";
+      return td;
+    }
+
+    function desenharPagina() {
+      const totalPaginas = Math.max(1, Math.ceil(itens.length / POR_PAGINA));
+      const linhas = itens.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA).map((item) => {
+        const tr = document.createElement("tr");
+        const tdImg = document.createElement("td");
+        const img = document.createElement("img");
+        img.src = `/api/imagens/${item.id}/thumbnail`;
+        img.loading = "lazy";
+        img.onerror = () => tdImg.replaceChildren("sem imagem");
+        tdImg.appendChild(img);
+        tr.append(tdImg, celula(item.id), celula(item.nome_arquivo), celula(item.satelite), celula(item.sensor),
+                  celula(item.data_captura), celula(item.tamanho_bytes), celula(item.origem));
+        return tr;
+      });
+      $("corpo").replaceChildren(...linhas);
+      $("pagina-info").textContent = `Página ${pagina} de ${totalPaginas}`;
+      $("anterior").disabled = pagina <= 1;
+      $("proxima").disabled = pagina >= totalPaginas;
+    }
+
+    $("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const inicio = performance.now();
+      $("botao").disabled = true;
+      $("status").textContent = "Ordenando...";
+      $("status").className = "";
+      $("tempo-sort").textContent = "—";
+      const relogio = setInterval(() => {
+        $("ao-vivo").textContent = ((performance.now() - inicio) / 1000).toFixed(2) + " s";
+      }, 50);
+
+      const params = new URLSearchParams({
+        algoritmo: $("algoritmo").value, campo: $("campo").value,
+      });
+      try {
+        const resposta = await fetch("/api/ordenar?" + params);
+        const dados = await resposta.json();
+        if (!resposta.ok) throw new Error(dados.erro || "erro no servidor");
+        itens = dados.itens;
+        pagina = 1;
+        $("tempo-sort").textContent = formatarTempo(dados.tempo_segundos);
+        $("status").textContent = `${dados.quantidade} registros ordenados com ${dados.algoritmo}.`;
+        desenharPagina();
+      } catch (erro) {
+        $("status").textContent = "Erro: " + erro.message;
+        $("status").className = "erro";
+      } finally {
+        clearInterval(relogio);
+        $("ao-vivo").textContent = ((performance.now() - inicio) / 1000).toFixed(2) + " s";
+        $("botao").disabled = false;
+      }
+    });
+
+    $("anterior").addEventListener("click", () => { pagina--; desenharPagina(); });
+    $("proxima").addEventListener("click", () => { pagina++; desenharPagina(); });
+  </script>
+</body>
+</html>
